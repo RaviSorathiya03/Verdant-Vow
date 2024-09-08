@@ -1,12 +1,15 @@
 import { Typography, Button } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
+  const navigate = useNavigate();
+
   return (
     <div className="relative bg-cream h-screen flex flex-col justify-center items-center text-center overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-40"
         style={{
-          backgroundImage: "url('/images/Hero-Section.jpeg')", // Replace with your nature image URL
+          backgroundImage: "url('/images/Hero-Section.jpeg')",
           backgroundAttachment: "fixed",
         }}
       >
@@ -21,7 +24,7 @@ export default function HeroSection() {
         <Typography variant="lead" color="gray" className="my-4 text-bold">
           Join us in supporting the Sustainable Development Goals (SDGs) to create a better future for our planet and all its inhabitants.
         </Typography>
-        <Button size="lg" variant="filled" className="bg-green-900">
+        <Button size="lg" variant="filled" className="bg-green-900" onClick={() => navigate("/about-us")}>
           Learn More
         </Button>
       </div>
