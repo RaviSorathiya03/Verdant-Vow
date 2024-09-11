@@ -1,7 +1,7 @@
-import { Card, Avatar, Typography, Tabs, TabsHeader, TabsBody, Tab, TabPanel, Dialog, Spinner } from "@material-tailwind/react";
+import { Card, Avatar, Typography, Tabs, TabsHeader, TabsBody, Tab, TabPanel, Dialog, Input, Button } from "@material-tailwind/react";
 import { CheckCircleIcon, ClockIcon, DocumentCheckIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil";
+import { useRecoilState } from "recoil";
 import axios from "axios";
 
 import LoadingScreen from "../../components/LoadingScreen";
@@ -13,37 +13,28 @@ import { isLoding } from "../../store/atoms";
 import ProfileInfo from "./ProfileInfo";
 import EventsCard from "./EventsCard";
 import TabButton from "./TabButton";
-import { useMemo } from "react";
 
 const UserProfile = () => {
   const [certificateCards, setCertificateCards] = useState([]);
   const [completedEvent, setCompletedEvent] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [ongoingEvent, setOngoingEvent] = useState(0);
+  const [joinModal, setJoinModal] = useState(false);
   const [loading, setIsLoading] = useRecoilState(isLoding);
   const [isMenuOpen, setIsMenuOpen] = useState(null);
   const [modalType, setModalType] = useState("");
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [isModal, setIsModal] = useState(false);
+  const [code, setCode] = useState("");
   const [event, setEvent] = useState([]);
   const [user, setUser] = useState({});
   const auth = useAuth();
 
   useEffect(() => {
     setIsLoading(true);
-    const delay = 60000;
-    const promise = new Promise((resolve) => setTimeout(resolve, delay));
-    promise.then(() => {
-      console.log("Hello world");
-      // setIsLoading(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    setIsLoading(true);
     axios
-      .get(import.meta.env.VITE_REACT_BASE_URL + "/user/getUsers", {
+      .get(import.meta.env.VITE_REACT_BASE_URL + "/user/", {
         headers: {
           Authorization: auth.user,
         },
@@ -51,29 +42,13 @@ const UserProfile = () => {
       .then((res) => {
         console.log(res.data.user);
         setUser(res.data.user);
+        setEvent(res.data.user.events);
       })
       .catch((error) => {
         console.log(error);
       })
       .finally(() => setIsLoading(false));
   }, []);
-
-  useEffect(() => {
-    setIsLoading(true);
-    axios
-      .get(import.meta.env.VITE_REACT_BASE_URL + `/event/allEvents`, {
-        headers: {
-          Authorization: auth.user,
-        },
-      })
-      .then(async (res) => {
-        setEvent(res.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => setIsLoading(false));
-  }, [user]);
 
   useEffect(() => {
     const countEvents = () => {
@@ -91,6 +66,24 @@ const UserProfile = () => {
     };
     countEvents();
   }, [event]);
+
+  function handleJoinSubmit(event) {
+    event.preventDefault();
+    axios
+      .post(
+        import.meta.env.VITE_REACT_BASE_URL + "/organization/verify-otp",
+        { code },
+        {
+          headers: { Authorization: auth.user },
+        }
+      )
+      .then((res) => {
+        setJoinModal(false);
+      })
+      .catch((error) => {
+        setJoinModal(false);
+      });
+  }
 
   const eventProgress = event.map((event) => {
     const totalLevels = event.levels.length;
@@ -144,7 +137,7 @@ const UserProfile = () => {
   const renderUserList = (list) => {
     return list.map((user, index) => (
       <Card key={index} className="flex items-center gap-4 p-4 mb-2">
-        <Avatar src={user.avatar} alt={user.name} size="md" variant="circular" />
+        <Avatar src={user.image} alt={user.name} size="md" variant="circular" />
         <div>
           <Typography variant="h6">{user.name}</Typography>
           <Typography variant="small" color="gray">
@@ -160,7 +153,7 @@ const UserProfile = () => {
   ) : (
     <div className="min-h-screen bg-[#fbf5ef] p-6">
       <Card className="p-6 mb-6 bg-white shadow-lg rounded-lg">
-        <ProfileInfo user={user} openModal={openModal} />
+        <ProfileInfo user={user} openModal={openModal} setJoinModal={setJoinModal} />
         <ProgressOverview completedEvent={completedEvent} ongoingEvent={ongoingEvent} />
       </Card>
 
@@ -206,6 +199,20 @@ const UserProfile = () => {
           </TabPanel>
         </TabsBody>
       </Tabs>
+
+      <Dialog size="sm" open={joinModal} handler={() => setJoinModal(false)}>
+        <div className="p-6">
+          <Typography variant="h4" className="mb-4">
+            Join Organization
+          </Typography>
+          <form onSubmit={handleJoinSubmit}>
+            <Input type="text" name="code" id="code" className="rounded-lg mb-2" label="Join Code" value={code} onChange={(e) => setCode(e.target.value)} />
+            <Button type="submit" variant="filled" color="green" className="mt-2">
+              Submit
+            </Button>
+          </form>
+        </div>
+      </Dialog>
 
       <Dialog size="lg" open={isModalOpen} handler={() => setIsModalOpen(false)}>
         <div className="p-6">

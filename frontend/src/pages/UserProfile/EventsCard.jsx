@@ -1,6 +1,7 @@
 import { AdjustmentsHorizontalIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Card, Menu, MenuHandler, MenuItem, MenuList, Progress, Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
+import moment from "moment";
 
 export default function EventsCard({ event, handleMenuToggle, isMenuOpen, progress, index }) {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ export default function EventsCard({ event, handleMenuToggle, isMenuOpen, progre
         {event.eventName}
       </Typography>
       <Typography variant="small" color="gray">
-        Start Date: {event.createdAt}
+        Start Date: {moment(event.createdAt).format("D MMM YYYY")}
       </Typography>
       <div className="flex justify-between items-center space-x-2">
         <Progress value={progress} color="green" className="text-center flex items-center p-0 mt-1" />

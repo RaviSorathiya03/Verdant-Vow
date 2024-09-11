@@ -1,5 +1,5 @@
-import { CalendarDaysIcon, ChevronDownIcon, PowerIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import { Menu, MenuHandler, Button, Avatar, MenuList, MenuItem, Typography } from "@material-tailwind/react";
+import { CalendarDaysIcon, ChevronDownIcon, PowerIcon, UserCircleIcon, DocumentTextIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 import { createElement, useEffect, useState } from "react";
 
@@ -20,6 +20,11 @@ export default function ProfileMenu({ className, placement }) {
       label: "New Event",
       icon: CalendarDaysIcon,
       action: () => navigate("/new-event"),
+    },
+    {
+      label: "New Blog",
+      icon: DocumentTextIcon,
+      action: () => navigate("/new-blog"),
     },
     {
       label: "Sign Out",

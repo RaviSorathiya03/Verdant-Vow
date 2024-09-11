@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Button, Input, Textarea, Typography, Select, Option, Alert, Tooltip } from "@material-tailwind/react";
+import { Button, Textarea, Typography, Select, Option, Alert, Tooltip } from "@material-tailwind/react";
 import { CameraIcon, XMarkIcon } from "@heroicons/react/24/outline"; // Substitute LeafIcon with a custom nature icon
+import { useNavigate, useParams } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import { FaLeaf } from "react-icons/fa";
 import axios from "axios";
+
+import LoadingScreen from "../../components/LoadingScreen";
 import { useAuth } from "../../hooks/UseAuth";
-import { useNavigate, useParams } from "react-router-dom";
+import { isLoding } from "../../store/atoms";
+import { useRecoilState } from "recoil";
 
 const NewPostPage = () => {
   const [alert, setAlert] = useState({ vis: false, color: "", msg: "" });
+  const [loading, setIsLoading] = useRecoilState(isLoding);
   const [selectedImage, setSelectedImage] = useState(null);
   const [postContent, setPostContent] = useState("");
   const [event, setEvent] = useState("");
@@ -19,11 +24,12 @@ const NewPostPage = () => {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setSelectedImage(URL.createObjectURL(file));
+      setSelectedImage(file);
     }
   };
 
   useEffect(() => {
+    setIsLoading(true);
     axios
       .get(import.meta.env.VITE_REACT_BASE_URL + `/event/allEvents`, {
         headers: {
@@ -36,41 +42,39 @@ const NewPostPage = () => {
       })
       .catch((error) => {
         console.log(error);
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   function handleSubmit() {
-    console.log(event);
+    const formData = new FormData();
+    formData.append("eventId", event);
+    formData.append("levelId", levelId);
+    formData.append("content", postContent);
+    if (selectedImage) {
+      formData.append("image", selectedImage);
+    }
+
     axios
-      .post(
-        import.meta.env.VITE_REACT_BASE_URL + "/post/createPost",
-        {
-          eventId: event,
-          levelId,
-          content: postContent,
-          imageUrl: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      .post(import.meta.env.VITE_REACT_BASE_URL + `/post`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: auth.user,
         },
-        {
-          headers: {
-            Authorization: auth.user,
-          },
-        }
-      )
+      })
       .then((res) => {
-        if (res.data && res.data.message) {
-          setAlert({ vis: true, color: "blue", msg: res.data.message });
-          navigate(`/event/${event}`);
-        } else {
-          setAlert({ vis: true, color: "red", msg: res.data.message });
-        }
+        setAlert({ vis: true, color: "blue", msg: "Post Created" });
+        navigate(`/event/${res.data.id}`);
       })
       .catch((error) => {
         console.error(error);
-        setAlert({ vis: true, color: "red", msg: error.response.data.details[0].message });
+        setAlert({ vis: true, color: "red", msg: error.response?.data?.details[0]?.message || "An error occurred" });
       });
   }
 
-  return (
+  return loading ? (
+    <LoadingScreen />
+  ) : (
     <div className="min-h-screen p-6 flex flex-col items-center justify-center">
       <Alert color={alert.color} variant="outlined" open={alert.vis} className="max-w-md mb-6 w-full">
         {alert.msg}
@@ -89,15 +93,6 @@ const NewPostPage = () => {
           </div>
           <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" />
         </div>
-
-        {selectedImage && (
-          <div className="mt-4 relative">
-            <img src={selectedImage} alt="Uploaded" className="w-full h-48 object-cover rounded-lg shadow-md" />
-            <Button className="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white font-bold rounded-full p-1" onClick={() => setSelectedImage(null)}>
-              <XMarkIcon className="w-5 h-5" />
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="w-full max-w-md mb-6">

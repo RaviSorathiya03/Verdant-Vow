@@ -3,6 +3,7 @@ import { Button, Input, Radio, Typography, Tooltip, Alert } from "@material-tail
 import { FaLeaf, FaCalendarAlt, FaTree } from "react-icons/fa";
 import axios from "axios";
 import { useAuth } from "../../hooks/UseAuth";
+import { useNavigate } from "react-router-dom";
 
 const NewEventPage = () => {
   const [alert, setAlert] = useState({ vis: false, color: "", msg: "" });
@@ -10,13 +11,14 @@ const NewEventPage = () => {
   const [eventDays, setEventDays] = useState("30");
   const [customDays, setCustomDays] = useState("");
   const [frequency, setFrequency] = useState("");
+  const navigate = useNavigate();
   const auth = useAuth();
 
   const handleEventCreation = () => {
     const days = eventDays === "custom" ? customDays : eventDays;
     axios
       .post(
-        import.meta.env.VITE_REACT_BASE_URL + "/event/createEvent",
+        import.meta.env.VITE_REACT_BASE_URL + "/event",
         {
           eventName,
           eventDays: parseInt(days),
@@ -30,6 +32,7 @@ const NewEventPage = () => {
         setEventDays("30");
         setCustomDays("");
         setFrequency("");
+        navigate(`/event/${res.data.event.id}`);
       })
       .catch((error) => {
         setAlert({ vis: true, color: "red", msg: error.response.data.message });
@@ -45,7 +48,6 @@ const NewEventPage = () => {
         Create a New Event
       </Typography>
 
-      {/* Event Name Input */}
       <div className="w-full max-w-lg mb-6 relative">
         <FaTree className="absolute top-3 left-3 text-green-700" />
         <Tooltip content="Enter Event Name" placement="top">
@@ -53,7 +55,6 @@ const NewEventPage = () => {
         </Tooltip>
       </div>
 
-      {/* Number of Days (Selection) */}
       <div className="w-full max-w-lg mb-6">
         <Typography variant="h5" className="mb-4 text-green-900">
           Select Event Duration
@@ -117,7 +118,6 @@ const NewEventPage = () => {
         )}
       </div>
 
-      {/* Frequency of Days Input */}
       <div className="w-full max-w-lg mb-6 relative">
         <FaCalendarAlt className="absolute top-3 left-3 text-green-700" />
         <Tooltip content="Enter how frequently you’ll post updates (e.g., Every 2 days)" placement="top">

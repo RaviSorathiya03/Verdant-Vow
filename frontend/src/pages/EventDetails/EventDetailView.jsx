@@ -1,4 +1,4 @@
-import { Typography } from "@material-tailwind/react";
+import { Alert, Typography } from "@material-tailwind/react";
 import { useParams } from "react-router-dom";
 import React, { useState } from "react";
 import { useEffect } from "react";
@@ -13,6 +13,7 @@ import { isLoding } from "../../store/atoms";
 import LoadingScreen from "../../components/LoadingScreen";
 
 const EventDetailView = () => {
+  const [alert, setAlert] = useState({ vis: false, color: "", msg: "" });
   const [loading, setIsLoading] = useRecoilState(isLoding);
   const [selectedLevel, setSelectedLevel] = useState(null);
   const [levels, setLevels] = useState([]);
@@ -24,14 +25,14 @@ const EventDetailView = () => {
   useEffect(() => {
     setIsLoading(true);
     axios
-      .get(import.meta.env.VITE_REACT_BASE_URL + `/event/getLevels/${eventId}`, {
+      .get(import.meta.env.VITE_REACT_BASE_URL + `/event/${eventId}`, {
         headers: {
           Authorization: auth.user,
         },
       })
       .then((res) => {
         console.log(res.data);
-        setLevels(res.data);
+        setLevels(res.data.levels);
         for (let i = 0; i <= res.data.length; i++) {
           if (res.data[i].isCompleted) {
             setCnt((pre) => pre + 1);
@@ -57,10 +58,14 @@ const EventDetailView = () => {
         </Typography>
       </header>
 
+      <Alert color={alert.color} variant="outlined" open={alert.vis} className="mb-2">
+        {alert.msg}
+      </Alert>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {levels.map((level, index) => (
           <div key={level.id} className="relative">
-            {level.isCompleted ? <CompeletedLevelcard level={level} setOpen={setOpen} setSelectedLevel={setSelectedLevel} /> : <LevelCard level={level} />}
+            {level.isCompleted ? <CompeletedLevelcard level={level} setOpen={setOpen} setSelectedLevel={setSelectedLevel} /> : <LevelCard level={level} setAlert={setAlert} />}
           </div>
         ))}
       </div>

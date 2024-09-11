@@ -14,6 +14,12 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import NewPostPage from "./pages/NewPost/NewPostPage";
 import NewEventPage from "./pages/NewEvent/NewEventPage";
 import OtpVerificationPage from "./pages/VerifyUser/OtpVerificationPage";
+import BlogEditor from "./pages/Blog/BlogEditor";
+import BlogViewer from "./pages/Blog/BlogViewer";
+import BlogListPage from "./pages/Blog/BlogListPage";
+import PublicUserProfile from "./pages/PublicUserProfile/PublicUserProfile";
+import PublicEventDetailView from "./pages/PublicEventDetails/PublicEventDetailView";
+import OrganizationProfile from "./pages/OrganizationProfile/OrganizationProfile";
 
 function App() {
   return (
@@ -23,9 +29,14 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/blog" element={<BlogListPage />} />
+          <Route path="/blog/:blogId" element={<BlogViewer />} />
+          <Route path="/user/:username" element={<PublicUserProfile />} />
+          <Route path="/user/:username/:eventId" element={<PublicEventDetailView />} />
+          <Route path="/organization" element={<OrganizationProfile />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify/:email/:entity" element={<OtpVerificationPage />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/verify/:email" element={<OtpVerificationPage />} />
           <Route
             path="/profile"
             element={
@@ -43,6 +54,14 @@ function App() {
             }
           />
           <Route
+            path="/new-blog"
+            element={
+              <ProtectedRoute>
+                <BlogEditor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/new-post/:levelId"
             element={
               <ProtectedRoute>
@@ -50,7 +69,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/user/:userId" element={<UserProfile />} />
           <Route
             path="/event/:eventId"
             element={

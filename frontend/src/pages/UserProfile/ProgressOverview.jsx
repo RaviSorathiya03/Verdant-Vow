@@ -24,7 +24,7 @@ export default function ProgressOverview({ ongoingEvent, completedEvent }) {
           Certificates Earned
         </Typography>
         <Typography variant="h4" color="white">
-          3
+          0
         </Typography>
       </Card>
     </div>

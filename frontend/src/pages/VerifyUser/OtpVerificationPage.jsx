@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Button, Typography } from "@material-tailwind/react";
 import { FaLeaf, FaExclamationCircle, FaCheckCircle } from "react-icons/fa";
-import axios from "axios";
+import { Button, Typography } from "@material-tailwind/react";
 import { useNavigate, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { decodeToken } from "react-jwt";
+import axios from "axios";
+
 import { useAuth } from "../../hooks/UseAuth";
 
 const OtpVerificationPage = () => {
   const [otp, setOtp] = useState(Array(6).fill(""));
   const [resendTimer, setResendTimer] = useState(30);
   const [isOtpValid, setIsOtpValid] = useState(null);
-  const { email } = useParams();
+  const { email, entity } = useParams();
   const auth = useAuth();
   const navigate = useNavigate();
 
@@ -26,28 +28,49 @@ const OtpVerificationPage = () => {
 
   const handleVerifyOtp = () => {
     const otpValue = otp.join("");
+    const path = entity === "user" ? "/user/verify-otp" : "/organization/verify";
     axios
-      .post(import.meta.env.VITE_REACT_BASE_URL + "/user/verify-otp", { otp: otpValue, email })
+      .post(import.meta.env.VITE_REACT_BASE_URL + path, { otp: otpValue, email })
       .then(async (res) => {
         setIsOtpValid(true);
-        await auth?.login(res.data.token);
+        console.log(res.data);
+        await auth.login(res.data);
+        const data = decodeToken(res.data); // Decode the token from the response
+        console.log(data);
+        if (data) {
+          if (data.userId) {
+            navigate("/profile");
+          } else if (data.organisationId) {
+            navigate("/organization");
+          }
+        }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         setIsOtpValid(false);
       });
   };
 
   useEffect(() => {
-    if (auth?.user) {
-      navigate("/profile");
+    if (auth.user) {
+      const data = decodeToken(auth.user);
+      console.log(data);
+      if (data) {
+        if (data.userId) {
+          navigate("/profile");
+        } else if (data.organizationId) {
+          navigate("/organization");
+        }
+      }
     }
+
     if (resendTimer > 0) {
       const intervalId = setInterval(() => {
         setResendTimer((prevTimer) => prevTimer - 1);
       }, 1000);
       return () => clearInterval(intervalId);
     }
-  }, [resendTimer]);
+  }, [resendTimer, auth.user, navigate]);
 
   const handleResendOtp = () => {
     setResendTimer(30);

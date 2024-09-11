@@ -1,5 +1,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { Button, Dialog, DialogBody, DialogFooter, DialogHeader, Typography } from "@material-tailwind/react";
+import moment from "moment";
 
 export default function LevelDetailModal({ selectedLevel, setOpen, open }) {
   const closeModal = () => setOpen(false);
@@ -15,7 +16,7 @@ export default function LevelDetailModal({ selectedLevel, setOpen, open }) {
         <Typography variant="h6" className="text-green-900">
           Postedn On :
         </Typography>
-        <Typography className="mb-4">{selectedLevel.post.postedAt}</Typography>
+        <Typography className="mb-4">{moment(selectedLevel.post.postedAt).format("D MMM YYYY")}</Typography>
         <Typography variant="h6" className="text-green-900">
           Description
         </Typography>

@@ -11,6 +11,13 @@ export default function NavList() {
           </ListItem>
         </Typography>
       </Link>
+      <Link to="/blog">
+        <Typography as="a" href="#" variant="small" color="blue-gray" className="font-medium" placeholder={undefined}>
+          <ListItem className="flex items-center gap-2 py-2 pr-4" placeholder={undefined}>
+            Blog
+          </ListItem>
+        </Typography>
+      </Link>
       <Link to="/about-us">
         <Typography as="a" href="#" variant="small" color="blue-gray" className="font-medium" placeholder={undefined}>
           <ListItem className="flex items-center gap-2 py-2 pr-4" placeholder={undefined}>

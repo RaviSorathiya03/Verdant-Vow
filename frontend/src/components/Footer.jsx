@@ -10,7 +10,7 @@ export default function Footer() {
           <Link to="/" className="hover:underline">
             Home
           </Link>
-          <Link href="/blog" className="hover:underline">
+          <Link to="/blog" className="hover:underline">
             Blog
           </Link>
           <Link to="/about-us" className="hover:underline">
