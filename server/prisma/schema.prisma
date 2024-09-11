@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id             String         @id @default(uuid())
+  name           String         // Add a name field for the organization
+  email          String         @unique
+  password       String
+  bio            String?
+  otp            String?
+  otpExpiresAt   DateTime?      @default(now())
+  isActive       Boolean        @default(false)
+  users          User[]         // One-to-many relationship with users
+  fundings       Funding[]
+  image          String         @default("https://placehold.co/600x400")
+  activationCodes ActivationCode[]
+  Blog Blog[] // One-to-many relationship with activation codes
+}
+
+model ActivationCode {
+  id              String         @id @default(uuid())
+  code            String         @unique
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+  isUsed          Boolean        @default(false) // To track if the code has been used
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  userId          String? 
+}
+
+model Funding {
+  id              String         @id @default(uuid())
+  name            String
+  fundRupee       Int
+  target          String
+  organizationId  String
+  organization    Organization   @relation(fields: [organizationId], references: [id])
+}
+
+model User {
+  id             String         @id @default(uuid())
+  username       String         @unique
+  image          String         @default("https://placehold.co/600x400")
+  organizationId String?        // Foreign key to Organization
+  organization   Organization?  @relation(fields: [organizationId], references: [id])
+  email          String         @unique
+  password       String
+  firstname      String
+  lastname       String
+  bio            String?
+  otp            String?        // Field for OTP
+  otpExpiresAt   DateTime?      // Field for OTP expiration
+  isActive       Boolean        @default(false) // Field to check if user is activated
+  followers      Follow[]       @relation("followers")
+  following      Follow[]       @relation("following")
+  followCount    Int            @default(0)
+  followingCount Int            @default(0)
+  events         Event[]
+  posts          Post[]
+  blogs          Blog[]
+  comments       Comment[]
+  notifications  Notification[] // One-to-many relationship with notifications
+}
+
+model Event {
+  id             String         @id @default(uuid())
+  eventName      String
+  userId         String
+  user           User           @relation(fields: [userId], references: [id])
+  eventDays      Int
+  dayFrequency   Int
+  status         eventStatus
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  levels         Level[]
+  posts          Post[]
+}
+
+model Level {
+  id            String         @id @default(uuid())
+  eventId       String
+  levelNumber   Int
+  event         Event          @relation(fields: [eventId], references: [id])
+  dueDate       DateTime
+  isCompleted   Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  posts         Post[]
+}
+
+model Post {
+  id          String         @id @default(uuid())
+  userId      String
+  eventId     String
+  levelId     String
+  image       String
+  user        User           @relation(fields: [userId], references: [id])
+  event       Event          @relation(fields: [eventId], references: [id])
+  level       Level          @relation(fields: [levelId], references: [id])
+  content     String
+  postedAt    DateTime       @default(now())
+  createdAt   DateTime       @default(now())
+}
+
+model Follow {
+  id            String         @id @default(uuid())
+  followerId    String
+  followingId   String
+
+  follower      User           @relation("followers", fields: [followerId], references: [id])
+  following     User           @relation("following", fields: [followingId], references: [id])
+
+  @@unique([followerId, followingId])
+}
+
+model Blog {
+  id            String         @id @default(uuid())
+  title         String
+  content       String
+  thumbnail     String         @default("https://placehold.co/600x400")
+  images        String[]
+  tags          Tag[]          @relation("BlogTags")
+  userId        String?
+  user          User?           @relation(fields: [userId], references: [id])
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+  comments      Comment[]
+  notifications Notification[] // Notifications related to the blog
+  likeCount     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Comment {
+  id            String         @id @default(uuid())
+  content       String
+  userId        String
+  blogId        String
+  parentId      String?        // Nullable field to support replies
+  user          User           @relation(fields: [userId], references: [id])
+  blog          Blog           @relation(fields: [blogId], references: [id])
+  parent        Comment?       @relation("CommentReplies", fields: [parentId], references: [id])
+  replies       Comment[]      @relation("CommentReplies")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Tag {
+  id            String         @id @default(uuid())
+  name          String         @unique
+  blogs         Blog[]         @relation("BlogTags")
+}
+
+model Notification {
+  id        String     @id @default(uuid())
+  message   String
+  userId    String
+  blogId    String?
+  createdAt DateTime   @default(now())
+  read      Boolean    @default(false)
+  blog      Blog?      @relation(fields: [blogId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+}
+
+enum eventStatus {
+  COMPLETED
+  PENDING
+  INCOMPLETE
+}

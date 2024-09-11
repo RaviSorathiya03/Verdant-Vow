@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Organization" ALTER COLUMN "otpExpiresAt" SET DEFAULT CURRENT_TIMESTAMP;
