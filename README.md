@@ -2,6 +2,8 @@
 
 **Verdant Vow** is a platform developed as part of **Hackathon 2024**, focusing on promoting sustainability through tree care initiatives. The project aligns with the **Sustainable Development Goals (SDGs)**, particularly emphasizing **climate action** and **life on land**. Users create events, track their progress, and receive certificates, while organizations manage participants and funds.
 
+[![wakatime](https://wakatime.com/badge/github/Jenil-Desai/Verdant-Vow.svg)](https://wakatime.com/badge/github/Jenil-Desai/Verdant-Vow)
+
 ## 🚀 Project Overview
 
 Verdant Vow allows users to:
